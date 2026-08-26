@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BizCafe | 台北商務約見與工作咖啡廳指南</title>
   
-  <!-- Open Graph 社群分享卡片標籤 (LINE/FB/Threads 預覽) -->
+  <!-- Open Graph 社群分享卡片標籤 (LINE / FB 預覽) -->
   <meta property="og:title" content="BizCafe | 台北商務約見與工作咖啡廳指南" />
-  <meta property="og:description" content="精選 150+ 間台北適合見客談事、簽約不限時、插座充足的優質工作咖啡廳。" />
+  <meta property="og:description" content="精選台北適合見客談事、簽約不限時、插座充足的優質工作咖啡廳。" />
   <meta property="og:type" content="website" />
   
   <!-- Tailwind CSS CDN -->
@@ -39,25 +39,11 @@
       }
     }
   </script>
-  <style>
-    /* 滑順捲動與字型渲染優化 */
-    html {
-      -webkit-font-smoothing: antialiased;
-      scroll-behavior: smooth;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 4px;
-    }
-  </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center shadow-md shadow-brand-600/20">
@@ -185,7 +171,7 @@
 
   <script>
     // ⚠️ 您的 Google Sheets CSV 網址 ⚠️
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNlnnMhGSMz/pub?output=csv";
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNInnMhGSMz/pub?output=csv";
 
     let cafes = [];
     let selectedDistrict = "all";
@@ -202,50 +188,48 @@
     const resetBtn = document.getElementById("reset-btn");
     const toast = document.getElementById("toast");
 
-    // 從 Google Sheets 抓取資料
-    async function loadDataFromSheet() {
-      try {
-        const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        if (!response.ok) throw new Error("網路連線異常");
-        const csvText = await response.text();
-
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: function(results) {
-            cafes = results.data
-              .filter(item => item.name && item.name.trim() !== "" && item.name.toLowerCase() !== "name")
-              .map(item => ({
-                id: item.id || Math.random().toString(),
-                name: (item.name || "").trim(),
-                mrt: (item.mrt || "").trim(),
-                district: (item.district || "其他").trim(),
-                address: (item.address || "").trim(),
-                minSpend: (item.minSpend || "依店家規定").trim(),
-                timeLimit: (item.timeLimit || "依現場為主").trim(),
-                socket: (item.socket || "未知").trim(),
-                quietLevel: (item.quietLevel || "適中").trim(),
-                reservable: String(item.reservable || "").toUpperCase() === "TRUE",
-                tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
-                googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent((item.name || "") + " " + (item.address || ""))}`
-              }));
-            
-            loadingState.classList.add("hidden");
-            buildDistrictButtons();
-            renderCafes();
-          },
-          error: function(err) {
-            console.error("解析 CSV 失敗:", err);
-            loadingState.innerHTML = "資料解析失敗，請確認試算表格式。";
+    // 採用穩定的 PapaParse download 模式
+    function loadDataFromSheet() {
+      Papa.parse(GOOGLE_SHEET_CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (!results.data || results.data.length === 0) {
+            loadingState.innerHTML = "試算表中無有效資料。";
+            return;
           }
-        });
-      } catch (e) {
-        console.error("載入失敗:", e);
-        loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
-      }
+
+          cafes = results.data
+            .filter(item => item.name && item.name.trim() !== "" && item.name.toLowerCase() !== "name")
+            .map(item => ({
+              id: item.id || Math.random().toString(),
+              name: (item.name || "").trim(),
+              mrt: (item.mrt || "").trim(),
+              district: (item.district || "其他").trim(),
+              address: (item.address || "").trim(),
+              minSpend: (item.minSpend || "依店家規定").trim(),
+              timeLimit: (item.timeLimit || "依現場為主").trim(),
+              socket: (item.socket || "未知").trim(),
+              quietLevel: (item.quietLevel || "適中").trim(),
+              rating: (item.rating || "").trim(), // Google 評分
+              reservable: String(item.reservable || "").toUpperCase() === "TRUE",
+              tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
+              googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent((item.name || "") + " " + (item.address || ""))}`
+            }));
+          
+          loadingState.classList.add("hidden");
+          buildDistrictButtons();
+          renderCafes();
+        },
+        error: function(err) {
+          console.error("載入失敗:", err);
+          loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
+        }
+      });
     }
 
-    // 自動建構行政區標籤 (依照數量由多到少排序)
+    // 自動建構行政區標籤 (依照數量排序)
     function buildDistrictButtons() {
       const districtCounts = {};
       cafes.forEach(c => {
@@ -254,20 +238,19 @@
         }
       });
 
-      // 依數量排序
       const sortedDistricts = Object.keys(districtCounts).sort((a, b) => districtCounts[b] - districtCounts[a]);
 
       districtContainer.innerHTML = "";
 
-      // 全部按鈕
+      // 全部區域
       const allBtn = document.createElement("button");
-      allBtn.className = "district-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-600 text-white shadow-sm transition-all duration-150";
+      allBtn.className = "district-btn px-4 py-1.5 rounded-full text-xs font-bold bg-brand-600 text-white shadow-sm transition-all duration-150";
       allBtn.dataset.district = "all";
       allBtn.textContent = `全部區域 (${cafes.length})`;
       allBtn.addEventListener("click", () => selectDistrict("all", allBtn));
       districtContainer.appendChild(allBtn);
 
-      // 各區域按鈕
+      // 各行政區
       sortedDistricts.forEach(district => {
         const btn = document.createElement("button");
         btn.className = "district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60 transition-all duration-150";
@@ -322,14 +305,25 @@
         
         const isUnlimited = cafe.tags.includes('unlimited') || cafe.timeLimit.includes('不限時');
 
+        // 星級評分 HTML (若有填寫評分則渲染)
+        const ratingHtml = cafe.rating ? `
+          <div class="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full text-[11px] font-bold border border-amber-200/60">
+            <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+            <span>${cafe.rating}</span>
+          </div>
+        ` : '';
+
         card.innerHTML = `
           <div class="space-y-3.5">
             <!-- Top Header -->
             <div class="flex items-start justify-between gap-2">
               <div class="space-y-1">
-                <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/50">
-                  ${cafe.district}
-                </span>
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/50">
+                    ${cafe.district}
+                  </span>
+                  ${ratingHtml}
+                </div>
                 <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-700 transition leading-snug">
                   ${cafe.name}
                 </h3>
@@ -387,17 +381,17 @@
       lucide.createIcons();
     }
 
-    // 複製卡片邏輯
+    // 複製卡片邏輯 (帶入星級)
     window.copyInviteCard = function(id) {
       const cafe = cafes.find(c => String(c.id) === String(id));
       if (!cafe) return;
 
-      const text = `📍 約定地點建議：\n\n【${cafe.name}】\n・交通：${cafe.mrt}\n・地址：${cafe.address}\n・規範：${cafe.minSpend} / ${cafe.timeLimit}\n・地圖導航：${cafe.googleMapsUrl}\n\n如有任何變動隨時跟我說！`;
+      const ratingText = cafe.rating ? ` (Google 評價 ★ ${cafe.rating})` : '';
+      const text = `📍 約定地點建議：\n\n【${cafe.name}】${ratingText}\n・交通：${cafe.mrt}\n・地址：${cafe.address}\n・規範：${cafe.minSpend} / ${cafe.timeLimit}\n・地圖導航：${cafe.googleMapsUrl}\n\n如有任何變動隨時跟我說！`;
 
       navigator.clipboard.writeText(text).then(() => {
         showToast("已複製約定地點資訊，可直接貼給客戶！");
         
-        // 按鈕視覺回饋
         const targetBtn = document.getElementById(`btn-copy-${id}`);
         if (targetBtn) {
           const btnText = targetBtn.querySelector(".btn-text");
@@ -472,7 +466,7 @@
       renderCafes();
     });
 
-    // 初始化載入
+    // 執行載入
     loadDataFromSheet();
   </script>
 </body>
