@@ -61,40 +61,56 @@
 
     <!-- Filters Container -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+      <!-- 搜尋列 -->
       <div class="relative">
         <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input 
           id="search-input" 
           type="text" 
-          placeholder="搜尋咖啡廳名稱、捷運站（例：市府站、松江南京）或區域..." 
+          placeholder="搜尋咖啡廳名稱、捷運站（例：市府站、松江南京）或地址..." 
           class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm placeholder:text-slate-400 bg-slate-50/50"
         />
       </div>
 
-      <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-        <button data-filter="socket" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+      <!-- 行政區快速切換標籤列 -->
+      <div class="space-y-1.5 pt-1">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">熱門商務行政區</div>
+        <div class="flex flex-wrap gap-2">
+          <button data-district="all" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-sm transition">全部區域</button>
+          <button data-district="信義區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">信義區</button>
+          <button data-district="中山區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">中山區</button>
+          <button data-district="中正區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">中正區</button>
+          <button data-district="大安區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">大安區</button>
+          <button data-district="松山區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">松山區</button>
+        </div>
+      </div>
+
+      <!-- 功能屬性篩選標籤列 -->
+      <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+        <span class="text-[11px] font-semibold text-slate-400 mr-1">設施條件:</span>
+        <button data-filter="socket" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="plug" class="w-3.5 h-3.5"></i>
           <span>很多插座</span>
         </button>
 
-        <button data-filter="unlimited" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+        <button data-filter="unlimited" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="clock" class="w-3.5 h-3.5"></i>
           <span>平日/全天不限時</span>
         </button>
 
-        <button data-filter="reservable" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+        <button data-filter="reservable" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
           <span>可預先訂位</span>
         </button>
 
-        <button data-filter="quiet" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+        <button data-filter="quiet" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
           <span>環境安靜好通話</span>
         </button>
 
         <button id="reset-btn" class="ml-auto text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 py-1.5">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-          重設篩選
+          重設所有條件
         </button>
       </div>
     </div>
@@ -114,7 +130,7 @@
         <i data-lucide="search-x" class="w-6 h-6"></i>
       </div>
       <p class="text-sm font-medium text-slate-600">找不到符合條件的咖啡廳</p>
-      <p class="text-xs text-slate-400">請嘗試調整關鍵字或減少篩選標籤</p>
+      <p class="text-xs text-slate-400">請嘗試更換行政區、調整關鍵字或減少篩選標籤</p>
     </div>
   </main>
 
@@ -129,10 +145,11 @@
   </footer>
 
   <script>
-    // ⚠️ 請在此處替換成你剛剛複製的 Google Sheets CSV 網址 ⚠️
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNlnnMhGSMz/pub?output=csv";
+    // ⚠️ 請確認此處已帶入你的 Google Sheets CSV 網址 ⚠️
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNInnMhGSMz/pub?output=csv";
 
     let cafes = [];
+    let selectedDistrict = "all";
     const activeFilters = new Set();
     let searchQuery = "";
 
@@ -141,6 +158,7 @@
     const loadingState = document.getElementById("loading-state");
     const searchInput = document.getElementById("search-input");
     const totalCountEl = document.getElementById("total-count");
+    const districtBtns = document.querySelectorAll(".district-btn");
     const filterBtns = document.querySelectorAll(".filter-btn");
     const resetBtn = document.getElementById("reset-btn");
     const toast = document.getElementById("toast");
@@ -153,20 +171,22 @@
           header: true,
           skipEmptyLines: true,
           complete: function(results) {
-            cafes = results.data.map(item => ({
-              id: item.id || Math.random().toString(),
-              name: item.name || "未命名店家",
-              mrt: item.mrt || "",
-              district: item.district || "台北市",
-              address: item.address || "",
-              minSpend: item.minSpend || "依店家規定",
-              timeLimit: item.timeLimit || "依現場為主",
-              socket: item.socket || "未知",
-              quietLevel: item.quietLevel || "適中",
-              reservable: (item.reservable || "").toUpperCase() === "TRUE",
-              tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
-              googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(item.name + " " + item.address)}`
-            }));
+            cafes = results.data
+              .filter(item => item.name && item.name.trim() !== "")
+              .map(item => ({
+                id: item.id || Math.random().toString(),
+                name: item.name || "未命名店家",
+                mrt: item.mrt || "",
+                district: (item.district || "台北市").trim(),
+                address: item.address || "",
+                minSpend: item.minSpend || "依店家規定",
+                timeLimit: item.timeLimit || "依現場為主",
+                socket: item.socket || "未知",
+                quietLevel: item.quietLevel || "適中",
+                reservable: (item.reservable || "").toUpperCase() === "TRUE",
+                tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
+                googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(item.name + " " + (item.address || ""))}`
+              }));
             
             loadingState.classList.add("hidden");
             renderCafes();
@@ -184,14 +204,20 @@
     // 渲染卡片
     function renderCafes() {
       const filtered = cafes.filter(cafe => {
+        // 行政區篩選
+        const matchDistrict = selectedDistrict === "all" || cafe.district.includes(selectedDistrict);
+
+        // 關鍵字搜尋
         const matchSearch = 
           cafe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.mrt.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.address.toLowerCase().includes(searchQuery.toLowerCase());
 
+        // 屬性標籤篩選
         const matchFilters = Array.from(activeFilters).every(filter => cafe.tags.includes(filter));
-        return matchSearch && matchFilters;
+
+        return matchDistrict && matchSearch && matchFilters;
       });
 
       totalCountEl.textContent = filtered.length;
@@ -212,10 +238,10 @@
           <div class="space-y-3">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${cafe.district}</span>
-                <h3 class="text-base font-bold text-slate-900 mt-1">${cafe.name}</h3>
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">${cafe.district}</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1.5 leading-snug">${cafe.name}</h3>
               </div>
-              <span class="text-xs px-2 py-1 rounded-md ${cafe.reservable ? 'bg-emerald-50 text-emerald-700 font-medium' : 'bg-slate-50 text-slate-400'}">
+              <span class="text-xs px-2 py-1 rounded-md shrink-0 ${cafe.reservable ? 'bg-emerald-50 text-emerald-700 font-medium' : 'bg-slate-50 text-slate-400'}">
                 ${cafe.reservable ? '可訂位' : '現場候位'}
               </span>
             </div>
@@ -232,7 +258,7 @@
               </div>
               <div class="flex items-center justify-between text-slate-600">
                 <span class="text-slate-400">時間限制</span>
-                <span class="font-medium ${cafe.tags.includes('unlimited') ? 'text-emerald-600' : ''}">${cafe.timeLimit}</span>
+                <span class="font-medium ${cafe.tags.includes('unlimited') ? 'text-emerald-600 font-semibold' : ''}">${cafe.timeLimit}</span>
               </div>
               <div class="flex items-center justify-between text-slate-600">
                 <span class="text-slate-400">插座狀況</span>
@@ -261,7 +287,7 @@
       lucide.createIcons();
     }
 
-    // 複製卡片
+    // 複製約定卡片
     window.copyInviteCard = function(id) {
       const cafe = cafes.find(c => String(c.id) === String(id));
       if (!cafe) return;
@@ -285,12 +311,28 @@
       }, 2500);
     }
 
-    // 事件監聽
+    // 搜尋輸入事件
     searchInput.addEventListener("input", (e) => {
       searchQuery = e.target.value.trim();
       renderCafes();
     });
 
+    // 行政區點擊事件
+    districtBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        districtBtns.forEach(b => {
+          b.classList.remove("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+          b.classList.add("bg-slate-100", "text-slate-600", "font-medium");
+        });
+        btn.classList.remove("bg-slate-100", "text-slate-600", "font-medium");
+        btn.classList.add("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+
+        selectedDistrict = btn.dataset.district;
+        renderCafes();
+      });
+    });
+
+    // 設施條件點擊事件
     filterBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         const filter = btn.dataset.filter;
@@ -307,18 +349,34 @@
       });
     });
 
+    // 重設按鈕
     resetBtn.addEventListener("click", () => {
       activeFilters.clear();
+      selectedDistrict = "all";
       searchQuery = "";
       searchInput.value = "";
+
+      // 還原行政區按鈕
+      districtBtns.forEach(b => {
+        if (b.dataset.district === "all") {
+          b.classList.add("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+          b.classList.remove("bg-slate-100", "text-slate-600", "font-medium");
+        } else {
+          b.classList.remove("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+          b.classList.add("bg-slate-100", "text-slate-600", "font-medium");
+        }
+      });
+
+      // 還原設施按鈕
       filterBtns.forEach(btn => {
         btn.classList.remove("bg-brand-600", "text-white", "border-brand-600");
         btn.classList.add("bg-white", "text-slate-600", "border-slate-200");
       });
+
       renderCafes();
     });
 
-    // 啟動載入
+    // 初始化載入試算表
     loadDataFromSheet();
   </script>
 </body>
