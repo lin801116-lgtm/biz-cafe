@@ -72,16 +72,17 @@
         />
       </div>
 
-      <!-- 行政區快速切換標籤列 -->
+      <!-- 行政區快速切換標籤列 (動態生成) -->
       <div class="space-y-1.5 pt-1">
-        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">熱門商務行政區</div>
-        <div class="flex flex-wrap gap-2">
-          <button data-district="all" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-sm transition">全部區域</button>
-          <button data-district="信義區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">信義區</button>
-          <button data-district="中山區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">中山區</button>
-          <button data-district="中正區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">中正區</button>
-          <button data-district="大安區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">大安區</button>
-          <button data-district="松山區" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition">松山區</button>
+        <div class="flex items-center justify-between">
+          <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">商務行政區篩選</div>
+          <div id="district-count-info" class="text-[11px] text-slate-400"></div>
+        </div>
+        <div id="district-container" class="flex flex-wrap gap-2">
+          <!-- 這裡會由 JavaScript 自動掃描試算表動態長出所有區域按鈕 -->
+          <button data-district="all" class="district-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-sm transition">
+            全部區域
+          </button>
         </div>
       </div>
 
@@ -145,8 +146,8 @@
   </footer>
 
   <script>
-    // ⚠️ 請確認此處已帶入你的 Google Sheets CSV 網址 ⚠️
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNlnnMhGSMz/pub?gid=594293915&single=true&output=csv";
+    // ⚠️ 您的 Google Sheets CSV 網址 ⚠️
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnbN6Mga8SPNXdkieT-BWaGBkXB-ODTJQ0THk1Rbnw8D2LP54gsvt52V70ezQCaO3PIhNInnMhGSMz/pub?output=csv";
 
     let cafes = [];
     let selectedDistrict = "all";
@@ -158,7 +159,7 @@
     const loadingState = document.getElementById("loading-state");
     const searchInput = document.getElementById("search-input");
     const totalCountEl = document.getElementById("total-count");
-    const districtBtns = document.querySelectorAll(".district-btn");
+    const districtContainer = document.getElementById("district-container");
     const filterBtns = document.querySelectorAll(".filter-btn");
     const resetBtn = document.getElementById("reset-btn");
     const toast = document.getElementById("toast");
@@ -166,46 +167,100 @@
     // 從 Google Sheets 抓取資料
     async function loadDataFromSheet() {
       try {
-        Papa.parse(GOOGLE_SHEET_CSV_URL, {
-          download: true,
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        if (!response.ok) throw new Error("網路連線異常");
+        const csvText = await response.text();
+
+        Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
           complete: function(results) {
             cafes = results.data
-              .filter(item => item.name && item.name.trim() !== "")
+              .filter(item => item.name && item.name.trim() !== "" && item.name.toLowerCase() !== "name")
               .map(item => ({
                 id: item.id || Math.random().toString(),
-                name: item.name || "未命名店家",
-                mrt: item.mrt || "",
-                district: (item.district || "台北市").trim(),
-                address: item.address || "",
-                minSpend: item.minSpend || "依店家規定",
-                timeLimit: item.timeLimit || "依現場為主",
-                socket: item.socket || "未知",
-                quietLevel: item.quietLevel || "適中",
-                reservable: (item.reservable || "").toUpperCase() === "TRUE",
+                name: (item.name || "").trim(),
+                mrt: (item.mrt || "").trim(),
+                district: (item.district || "其他").trim(),
+                address: (item.address || "").trim(),
+                minSpend: (item.minSpend || "依店家規定").trim(),
+                timeLimit: (item.timeLimit || "依現場為主").trim(),
+                socket: (item.socket || "未知").trim(),
+                quietLevel: (item.quietLevel || "適中").trim(),
+                reservable: String(item.reservable || "").toUpperCase() === "TRUE",
                 tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
-                googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(item.name + " " + (item.address || ""))}`
+                googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent((item.name || "") + " " + (item.address || ""))}`
               }));
             
             loadingState.classList.add("hidden");
+            buildDistrictButtons(); // 自動生成行政區按鈕
             renderCafes();
           },
           error: function(err) {
-            console.error("載入試算表失敗:", err);
-            loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
+            console.error("解析 CSV 失敗:", err);
+            loadingState.innerHTML = "資料解析失敗，請確認試算表格式。";
           }
         });
       } catch (e) {
-        console.error(e);
+        console.error("載入失敗:", e);
+        loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
       }
     }
 
-    // 渲染卡片
+    // 動態掃描並建立所有行政區按鈕
+    function buildDistrictButtons() {
+      // 統計各區域的咖啡廳數量
+      const districtCounts = {};
+      cafes.forEach(c => {
+        if (c.district) {
+          districtCounts[c.district] = (districtCounts[c.district] || 0) + 1;
+        }
+      });
+
+      // 取得所有不重複的行政區清單
+      const districts = Object.keys(districtCounts);
+
+      // 清空原有按鈕，重新建構
+      districtContainer.innerHTML = "";
+
+      // 1. 先加入「全部區域」按鈕
+      const allBtn = document.createElement("button");
+      allBtn.className = "district-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-sm transition";
+      allBtn.dataset.district = "all";
+      allBtn.textContent = `全部區域 (${cafes.length})`;
+      allBtn.addEventListener("click", () => selectDistrict("all", allBtn));
+      districtContainer.appendChild(allBtn);
+
+      // 2. 逐一加入試算表中出現的所有行政區
+      districts.forEach(district => {
+        const btn = document.createElement("button");
+        btn.className = "district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
+        btn.dataset.district = district;
+        btn.textContent = `${district} (${districtCounts[district]})`;
+        btn.addEventListener("click", () => selectDistrict(district, btn));
+        districtContainer.appendChild(btn);
+      });
+    }
+
+    // 切換行政區邏輯
+    function selectDistrict(district, targetBtn) {
+      selectedDistrict = district;
+      const allBtns = districtContainer.querySelectorAll(".district-btn");
+      allBtns.forEach(b => {
+        b.classList.remove("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+        b.classList.add("bg-slate-100", "text-slate-600", "font-medium");
+      });
+      targetBtn.classList.remove("bg-slate-100", "text-slate-600", "font-medium");
+      targetBtn.classList.add("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
+
+      renderCafes();
+    }
+
+    // 渲染咖啡廳卡片
     function renderCafes() {
       const filtered = cafes.filter(cafe => {
         // 行政區篩選
-        const matchDistrict = selectedDistrict === "all" || cafe.district.includes(selectedDistrict);
+        const matchDistrict = selectedDistrict === "all" || cafe.district === selectedDistrict;
 
         // 關鍵字搜尋
         const matchSearch = 
@@ -317,21 +372,6 @@
       renderCafes();
     });
 
-    // 行政區點擊事件
-    districtBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        districtBtns.forEach(b => {
-          b.classList.remove("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
-          b.classList.add("bg-slate-100", "text-slate-600", "font-medium");
-        });
-        btn.classList.remove("bg-slate-100", "text-slate-600", "font-medium");
-        btn.classList.add("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
-
-        selectedDistrict = btn.dataset.district;
-        renderCafes();
-      });
-    });
-
     // 設施條件點擊事件
     filterBtns.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -357,7 +397,8 @@
       searchInput.value = "";
 
       // 還原行政區按鈕
-      districtBtns.forEach(b => {
+      const allBtns = districtContainer.querySelectorAll(".district-btn");
+      allBtns.forEach(b => {
         if (b.dataset.district === "all") {
           b.classList.add("bg-brand-600", "text-white", "font-semibold", "shadow-sm");
           b.classList.remove("bg-slate-100", "text-slate-600", "font-medium");
@@ -376,7 +417,7 @@
       renderCafes();
     });
 
-    // 初始化載入試算表
+    // 初始化載入
     loadDataFromSheet();
   </script>
 </body>
