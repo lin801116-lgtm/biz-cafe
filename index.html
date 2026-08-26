@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PapaParse 用於解析 Google Sheet CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -59,7 +61,6 @@
 
     <!-- Filters Container -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-      <!-- Search Input -->
       <div class="relative">
         <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input 
@@ -70,33 +71,27 @@
         />
       </div>
 
-      <!-- Filter Buttons -->
       <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-        <!-- Socket Filter -->
         <button data-filter="socket" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="plug" class="w-3.5 h-3.5"></i>
           <span>很多插座</span>
         </button>
 
-        <!-- Time Limit Filter -->
         <button data-filter="unlimited" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="clock" class="w-3.5 h-3.5"></i>
           <span>平日/全天不限時</span>
         </button>
 
-        <!-- Reservation Filter -->
         <button data-filter="reservable" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
           <span>可預先訂位</span>
         </button>
 
-        <!-- Quietness Filter -->
         <button data-filter="quiet" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
           <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
           <span>環境安靜好通話</span>
         </button>
 
-        <!-- Reset Button -->
         <button id="reset-btn" class="ml-auto text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 py-1.5">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
           重設篩選
@@ -104,10 +99,14 @@
       </div>
     </div>
 
-    <!-- Results List -->
-    <div id="cafe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Cards will be injected by JavaScript -->
+    <!-- Loading State -->
+    <div id="loading-state" class="py-12 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
+      <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-brand-600"></i>
+      載入最新咖啡廳資料中...
     </div>
+
+    <!-- Results List -->
+    <div id="cafe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
     <!-- Empty State -->
     <div id="empty-state" class="hidden py-16 text-center space-y-3">
@@ -130,119 +129,68 @@
   </footer>
 
   <script>
-    // 預設精選咖啡廳資料庫
-    const cafes = [
-      {
-        id: 1,
-        name: "森高砂咖啡館 (華山旗艦店)",
-        mrt: "忠孝新生站 1 號出口 (步行 4 分鐘)",
-        district: "中正區",
-        address: "台北市中正區八德路一段1號",
-        minSpend: "每人低消一杯飲品 ($180起)",
-        timeLimit: "平日不限時 / 客滿 2 小時",
-        socket: "多 (靠牆及大長桌均有)",
-        quietLevel: "適中 (桌距寬敞不干擾)",
-        reservable: true,
-        tags: ["reservable", "socket"],
-        googleMapsUrl: "https://maps.google.com/?q=森高砂咖啡館+華山旗艦店"
-      },
-      {
-        id: 2,
-        name: "鬧咖啡 NOW coffee",
-        mrt: "西門站 / 北門站 (步行 6 分鐘)",
-        district: "中正區",
-        address: "台北市中正區延平南路58號",
-        minSpend: "低消一杯飲品 ($120起)",
-        timeLimit: "全天不限時",
-        socket: "極多 (二樓工作區插座充足)",
-        quietLevel: "安靜 (適合展示簡報)",
-        reservable: false,
-        tags: ["unlimited", "socket", "quiet"],
-        googleMapsUrl: "https://maps.google.com/?q=鬧咖啡+NOW+coffee"
-      },
-      {
-        id: 3,
-        name: "Komeda's Coffee 客美多 (南京建國店)",
-        mrt: "松江南京站 6 號出口 (步行 3 分鐘)",
-        district: "中山區",
-        address: "台北市中山區南京東路二段204號",
-        minSpend: "每人低消一項餐點或飲品 ($110起)",
-        timeLimit: "限時 2 小時",
-        socket: "多 (各卡座獨立插座)",
-        quietLevel: "適中 (隔間包廂隱密感高)",
-        reservable: true,
-        tags: ["reservable", "socket"],
-        googleMapsUrl: "https://maps.google.com/?q=客美多咖啡+南京建國店"
-      },
-      {
-        id: 4,
-        name: "Out of Office 不在辦公室",
-        mrt: "市政府站 1 號出口 (步行 2 分鐘)",
-        district: "信義區",
-        address: "台北市信義區忠孝東路五段17-1號B1",
-        minSpend: "低消 $200 / 人",
-        timeLimit: "全天不限時",
-        socket: "多 (長桌配置充沛插座)",
-        quietLevel: "適中 (空間極大不壓迫)",
-        reservable: true,
-        tags: ["unlimited", "reservable", "socket"],
-        googleMapsUrl: "https://maps.google.com/?q=Out+of+Office+不在辦公室"
-      },
-      {
-        id: 5,
-        name: "未央咖啡店",
-        mrt: "科技大樓站 (步行 7 分鐘)",
-        district: "大安區",
-        address: "台北市大安區四維路208巷10號",
-        minSpend: "低消一杯飲品",
-        timeLimit: "全天不限時 (營業至深夜)",
-        socket: "多 (幾乎每桌附插座)",
-        quietLevel: "極安靜 (不適合多人大聲討論)",
-        reservable: false,
-        tags: ["unlimited", "socket", "quiet"],
-        googleMapsUrl: "https://maps.google.com/?q=未央咖啡店"
-      },
-      {
-        id: 6,
-        name: "Rayca Coffee",
-        mrt: "民權西路站 9 號出口 (步行 3 分鐘)",
-        district: "中山區",
-        address: "台北市中山區錦西街24號",
-        minSpend: "低消一杯飲品或餐點",
-        timeLimit: "全天不限時",
-        socket: "多 (2/3樓專屬辦公氛圍)",
-        quietLevel: "安靜好討論",
-        reservable: true,
-        tags: ["unlimited", "reservable", "socket", "quiet"],
-        googleMapsUrl: "https://maps.google.com/?q=Rayca+Coffee"
-      }
-    ];
+    // ⚠️ 請在此處替換成你剛剛複製的 Google Sheets CSV 網址 ⚠️
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_REPLACE_WITH_YOUR_CSV_URL/pub?output=csv";
 
-    // 狀態管理
+    let cafes = [];
     const activeFilters = new Set();
     let searchQuery = "";
 
     const grid = document.getElementById("cafe-grid");
     const emptyState = document.getElementById("empty-state");
+    const loadingState = document.getElementById("loading-state");
     const searchInput = document.getElementById("search-input");
     const totalCountEl = document.getElementById("total-count");
     const filterBtns = document.querySelectorAll(".filter-btn");
     const resetBtn = document.getElementById("reset-btn");
     const toast = document.getElementById("toast");
 
+    // 從 Google Sheets 抓取資料
+    async function loadDataFromSheet() {
+      try {
+        Papa.parse(GOOGLE_SHEET_CSV_URL, {
+          download: true,
+          header: true,
+          skipEmptyLines: true,
+          complete: function(results) {
+            cafes = results.data.map(item => ({
+              id: item.id || Math.random().toString(),
+              name: item.name || "未命名店家",
+              mrt: item.mrt || "",
+              district: item.district || "台北市",
+              address: item.address || "",
+              minSpend: item.minSpend || "依店家規定",
+              timeLimit: item.timeLimit || "依現場為主",
+              socket: item.socket || "未知",
+              quietLevel: item.quietLevel || "適中",
+              reservable: (item.reservable || "").toUpperCase() === "TRUE",
+              tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
+              googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(item.name + " " + item.address)}`
+            }));
+            
+            loadingState.classList.add("hidden");
+            renderCafes();
+          },
+          error: function(err) {
+            console.error("載入試算表失敗:", err);
+            loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
+          }
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     // 渲染卡片
     function renderCafes() {
       const filtered = cafes.filter(cafe => {
-        // 關鍵字比對
         const matchSearch = 
           cafe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.mrt.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
           cafe.address.toLowerCase().includes(searchQuery.toLowerCase());
 
-        // 標籤篩選比對
         const matchFilters = Array.from(activeFilters).every(filter => cafe.tags.includes(filter));
-
         return matchSearch && matchFilters;
       });
 
@@ -298,7 +246,7 @@
           </div>
 
           <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-            <button onclick="copyInviteCard(${cafe.id})" class="flex-1 py-2 px-3 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <button onclick="copyInviteCard('${cafe.id}')" class="flex-1 py-2 px-3 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               複製約定卡片
             </button>
@@ -313,9 +261,9 @@
       lucide.createIcons();
     }
 
-    // 複製約定卡片（方便傳 LINE 給客戶）
+    // 複製卡片
     window.copyInviteCard = function(id) {
-      const cafe = cafes.find(c => c.id === id);
+      const cafe = cafes.find(c => String(c.id) === String(id));
       if (!cafe) return;
 
       const text = `📍 約定地點建議：\n\n【${cafe.name}】\n・交通：${cafe.mrt}\n・地址：${cafe.address}\n・規範：${cafe.minSpend} / ${cafe.timeLimit}\n・地圖導航：${cafe.googleMapsUrl}\n\n如有任何變動隨時跟我說！`;
@@ -370,8 +318,8 @@
       renderCafes();
     });
 
-    // 初始載入
-    renderCafes();
+    // 啟動載入
+    loadDataFromSheet();
   </script>
 </body>
 </html>
