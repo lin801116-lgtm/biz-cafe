@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizCafe | 業務約見與工作咖啡廳指南</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fbf8f3',
+              100: '#f5efe4',
+              500: '#a3704c',
+              600: '#8b5937',
+              900: '#3d2516',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
+          <i data-lucide="coffee" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight text-slate-900">BizCafe</span>
+          <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 rounded bg-brand-100 text-brand-900 ml-2">商務約見專用</span>
+        </div>
+      </div>
+      <div class="text-xs text-slate-500">
+        已收錄 <span id="total-count" class="font-bold text-slate-800">0</span> 間精選店點
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Search Filter Section -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+    <div class="text-center max-w-2xl mx-auto space-y-2">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        快速找到適合 <span class="text-brand-600">見客談事</span> 的咖啡廳
+      </h1>
+      <p class="text-slate-600 text-sm sm:text-base">
+        不限時、插座充足、環境安靜好討論。避免簽約談案到一半被請走的尷尬場面。
+      </p>
+    </div>
+
+    <!-- Filters Container -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+      <!-- Search Input -->
+      <div class="relative">
+        <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          id="search-input" 
+          type="text" 
+          placeholder="搜尋咖啡廳名稱、捷運站（例：市府站、松江南京）或區域..." 
+          class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm placeholder:text-slate-400 bg-slate-50/50"
+        />
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+        <!-- Socket Filter -->
+        <button data-filter="socket" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+          <i data-lucide="plug" class="w-3.5 h-3.5"></i>
+          <span>很多插座</span>
+        </button>
+
+        <!-- Time Limit Filter -->
+        <button data-filter="unlimited" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>平日/全天不限時</span>
+        </button>
+
+        <!-- Reservation Filter -->
+        <button data-filter="reservable" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+          <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
+          <span>可預先訂位</span>
+        </button>
+
+        <!-- Quietness Filter -->
+        <button data-filter="quiet" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition flex items-center gap-1.5">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+          <span>環境安靜好通話</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button id="reset-btn" class="ml-auto text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 py-1.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          重設篩選
+        </button>
+      </div>
+    </div>
+
+    <!-- Results List -->
+    <div id="cafe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Cards will be injected by JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden py-16 text-center space-y-3">
+      <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+        <i data-lucide="search-x" class="w-6 h-6"></i>
+      </div>
+      <p class="text-sm font-medium text-slate-600">找不到符合條件的咖啡廳</p>
+      <p class="text-xs text-slate-400">請嘗試調整關鍵字或減少篩選標籤</p>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium shadow-xl opacity-0 translate-y-4 transition duration-300 pointer-events-none flex items-center gap-2 z-50">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-text">已複製約定地點資訊至剪貼簿！</span>
+  </div>
+
+  <footer class="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white">
+    <p>BizCafe © 2026 ・ 專為商務人士、顧問與業務打造</p>
+  </footer>
+
+  <script>
+    // 預設精選咖啡廳資料庫
+    const cafes = [
+      {
+        id: 1,
+        name: "森高砂咖啡館 (華山旗艦店)",
+        mrt: "忠孝新生站 1 號出口 (步行 4 分鐘)",
+        district: "中正區",
+        address: "台北市中正區八德路一段1號",
+        minSpend: "每人低消一杯飲品 ($180起)",
+        timeLimit: "平日不限時 / 客滿 2 小時",
+        socket: "多 (靠牆及大長桌均有)",
+        quietLevel: "適中 (桌距寬敞不干擾)",
+        reservable: true,
+        tags: ["reservable", "socket"],
+        googleMapsUrl: "https://maps.google.com/?q=森高砂咖啡館+華山旗艦店"
+      },
+      {
+        id: 2,
+        name: "鬧咖啡 NOW coffee",
+        mrt: "西門站 / 北門站 (步行 6 分鐘)",
+        district: "中正區",
+        address: "台北市中正區延平南路58號",
+        minSpend: "低消一杯飲品 ($120起)",
+        timeLimit: "全天不限時",
+        socket: "極多 (二樓工作區插座充足)",
+        quietLevel: "安靜 (適合展示簡報)",
+        reservable: false,
+        tags: ["unlimited", "socket", "quiet"],
+        googleMapsUrl: "https://maps.google.com/?q=鬧咖啡+NOW+coffee"
+      },
+      {
+        id: 3,
+        name: "Komeda's Coffee 客美多 (南京建國店)",
+        mrt: "松江南京站 6 號出口 (步行 3 分鐘)",
+        district: "中山區",
+        address: "台北市中山區南京東路二段204號",
+        minSpend: "每人低消一項餐點或飲品 ($110起)",
+        timeLimit: "限時 2 小時",
+        socket: "多 (各卡座獨立插座)",
+        quietLevel: "適中 (隔間包廂隱密感高)",
+        reservable: true,
+        tags: ["reservable", "socket"],
+        googleMapsUrl: "https://maps.google.com/?q=客美多咖啡+南京建國店"
+      },
+      {
+        id: 4,
+        name: "Out of Office 不在辦公室",
+        mrt: "市政府站 1 號出口 (步行 2 分鐘)",
+        district: "信義區",
+        address: "台北市信義區忠孝東路五段17-1號B1",
+        minSpend: "低消 $200 / 人",
+        timeLimit: "全天不限時",
+        socket: "多 (長桌配置充沛插座)",
+        quietLevel: "適中 (空間極大不壓迫)",
+        reservable: true,
+        tags: ["unlimited", "reservable", "socket"],
+        googleMapsUrl: "https://maps.google.com/?q=Out+of+Office+不在辦公室"
+      },
+      {
+        id: 5,
+        name: "未央咖啡店",
+        mrt: "科技大樓站 (步行 7 分鐘)",
+        district: "大安區",
+        address: "台北市大安區四維路208巷10號",
+        minSpend: "低消一杯飲品",
+        timeLimit: "全天不限時 (營業至深夜)",
+        socket: "多 (幾乎每桌附插座)",
+        quietLevel: "極安靜 (不適合多人大聲討論)",
+        reservable: false,
+        tags: ["unlimited", "socket", "quiet"],
+        googleMapsUrl: "https://maps.google.com/?q=未央咖啡店"
+      },
+      {
+        id: 6,
+        name: "Rayca Coffee",
+        mrt: "民權西路站 9 號出口 (步行 3 分鐘)",
+        district: "中山區",
+        address: "台北市中山區錦西街24號",
+        minSpend: "低消一杯飲品或餐點",
+        timeLimit: "全天不限時",
+        socket: "多 (2/3樓專屬辦公氛圍)",
+        quietLevel: "安靜好討論",
+        reservable: true,
+        tags: ["unlimited", "reservable", "socket", "quiet"],
+        googleMapsUrl: "https://maps.google.com/?q=Rayca+Coffee"
+      }
+    ];
+
+    // 狀態管理
+    const activeFilters = new Set();
+    let searchQuery = "";
+
+    const grid = document.getElementById("cafe-grid");
+    const emptyState = document.getElementById("empty-state");
+    const searchInput = document.getElementById("search-input");
+    const totalCountEl = document.getElementById("total-count");
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const toast = document.getElementById("toast");
+
+    // 渲染卡片
+    function renderCafes() {
+      const filtered = cafes.filter(cafe => {
+        // 關鍵字比對
+        const matchSearch = 
+          cafe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.mrt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.address.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // 標籤篩選比對
+        const matchFilters = Array.from(activeFilters).every(filter => cafe.tags.includes(filter));
+
+        return matchSearch && matchFilters;
+      });
+
+      totalCountEl.textContent = filtered.length;
+      grid.innerHTML = "";
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove("hidden");
+        return;
+      } else {
+        emptyState.classList.add("hidden");
+      }
+
+      filtered.forEach(cafe => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl p-5 border border-slate-200 hover:border-brand-500/40 hover:shadow-md transition duration-200 flex flex-col justify-between space-y-4";
+        
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${cafe.district}</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1">${cafe.name}</h3>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-md ${cafe.reservable ? 'bg-emerald-50 text-emerald-700 font-medium' : 'bg-slate-50 text-slate-400'}">
+                ${cafe.reservable ? '可訂位' : '現場候位'}
+              </span>
+            </div>
+
+            <div class="text-xs text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-600 shrink-0"></i>
+              <span class="truncate">${cafe.mrt}</span>
+            </div>
+
+            <div class="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
+              <div class="flex items-center justify-between text-slate-600">
+                <span class="text-slate-400">低消規定</span>
+                <span class="font-medium">${cafe.minSpend}</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-600">
+                <span class="text-slate-400">時間限制</span>
+                <span class="font-medium ${cafe.tags.includes('unlimited') ? 'text-emerald-600' : ''}">${cafe.timeLimit}</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-600">
+                <span class="text-slate-400">插座狀況</span>
+                <span class="font-medium">${cafe.socket}</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-600">
+                <span class="text-slate-400">環境氛圍</span>
+                <span class="font-medium">${cafe.quietLevel}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+            <button onclick="copyInviteCard(${cafe.id})" class="flex-1 py-2 px-3 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              複製約定卡片
+            </button>
+            <a href="${cafe.googleMapsUrl}" target="_blank" rel="noopener" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs flex items-center justify-center transition" title="前往 Google Maps">
+              <i data-lucide="navigation" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // 複製約定卡片（方便傳 LINE 給客戶）
+    window.copyInviteCard = function(id) {
+      const cafe = cafes.find(c => c.id === id);
+      if (!cafe) return;
+
+      const text = `📍 約定地點建議：\n\n【${cafe.name}】\n・交通：${cafe.mrt}\n・地址：${cafe.address}\n・規範：${cafe.minSpend} / ${cafe.timeLimit}\n・地圖導航：${cafe.googleMapsUrl}\n\n如有任何變動隨時跟我說！`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("已複製見面地點資訊，可直接貼給客戶！");
+      });
+    };
+
+    function showToast(msg) {
+      const toastText = document.getElementById("toast-text");
+      toastText.textContent = msg;
+      toast.classList.remove("opacity-0", "translate-y-4");
+      toast.classList.add("opacity-100", "translate-y-0");
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-4");
+        toast.classList.remove("opacity-100", "translate-y-0");
+      }, 2500);
+    }
+
+    // 事件監聽
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim();
+      renderCafes();
+    });
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const filter = btn.dataset.filter;
+        if (activeFilters.has(filter)) {
+          activeFilters.delete(filter);
+          btn.classList.remove("bg-brand-600", "text-white", "border-brand-600");
+          btn.classList.add("bg-white", "text-slate-600", "border-slate-200");
+        } else {
+          activeFilters.add(filter);
+          btn.classList.add("bg-brand-600", "text-white", "border-brand-600");
+          btn.classList.remove("bg-white", "text-slate-600", "border-slate-200");
+        }
+        renderCafes();
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      activeFilters.clear();
+      searchQuery = "";
+      searchInput.value = "";
+      filterBtns.forEach(btn => {
+        btn.classList.remove("bg-brand-600", "text-white", "border-brand-600");
+        btn.classList.add("bg-white", "text-slate-600", "border-slate-200");
+      });
+      renderCafes();
+    });
+
+    // 初始載入
+    renderCafes();
+  </script>
+</body>
+</html>
