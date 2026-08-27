@@ -27,7 +27,8 @@
               500: '#9c6644',
               600: '#7f4f24',
               700: '#58310c',
-              900: '#331800',
+              800: '#432818',
+              900: '#2b1810',
             }
           },
           boxShadow: {
@@ -35,6 +36,464 @@
             'card-hover': '0 12px 28px -6px rgba(127, 79, 36, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04)'
           }
         }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo + Tagline -->
+      <div class="flex items-center space-x-3">
+        <!-- 精準手繪風 SVG Logo -->
+        <div class="w-10 h-10 shrink-0">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+            <!-- 碟子 -->
+            <ellipse cx="50" cy="85" rx="36" ry="7" fill="#f5ede0" stroke="#331c12" stroke-width="4"/>
+            <!-- 杯把 -->
+            <path d="M72 48C84 48 89 57 85 68C81 77 72 75 66 73" stroke="#331c12" stroke-width="5" stroke-linecap="round"/>
+            <!-- 杯身 -->
+            <path d="M22 42C22 42 24 78 50 78C76 78 78 42 78 42H22Z" fill="#fcf8f2" stroke="#331c12" stroke-width="5" stroke-linejoin="round"/>
+            <!-- 咖啡表面拉花 -->
+            <ellipse cx="50" cy="43" rx="27" ry="8" fill="#783e18" stroke="#331c12" stroke-width="4"/>
+            <ellipse cx="50" cy="43" rx="17" ry="4.5" fill="#a45d2d"/>
+            <ellipse cx="50" cy="43" rx="10" ry="2.5" fill="#fcf8f2"/>
+            <circle cx="50" cy="42" r="1.5" fill="#a45d2d"/>
+            <!-- 杯身橘紅地標 Pin -->
+            <path d="M50 56C45 56 41 60 41 65C41 71.5 50 77 50 77C50 77 59 71.5 59 65C59 60 55 56 50 56Z" fill="#e75b28"/>
+            <circle cx="50" cy="64" r="2.5" fill="#fcf8f2"/>
+            <!-- 對話氣泡 (冒出的蒸氣) -->
+            <path d="M50 8C33.5 8 26 19 26 29C26 36 30 42 36 45L34 53L44 48C46 48.7 48 49 50 49C66.5 49 74 38 74 29C74 19 66.5 8 50 8Z" fill="#fcf8f2" stroke="#331c12" stroke-width="4.5" stroke-linejoin="round"/>
+            <!-- 對話框三個點 -->
+            <circle cx="39" cy="28" r="3" fill="#331c12"/>
+            <circle cx="50" cy="28" r="3" fill="#331c12"/>
+            <circle cx="61" cy="28" r="3" fill="#331c12"/>
+          </svg>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl font-black tracking-tight text-slate-900">好談 Cafe</span>
+          <span class="hidden sm:inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 border border-brand-200/80">
+            業務見客 ✕ 團隊輔導 ✕ 朋友聊心
+          </span>
+        </div>
+      </div>
+
+      <!-- Shop Count Badge -->
+      <div class="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/60">
+        <i data-lucide="store" class="w-3.5 h-3.5 text-slate-400"></i>
+        <span>已精選 <strong id="total-count" class="font-bold text-slate-900">0</strong> 間好談店點</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-7">
+    
+    <!-- Hero Header -->
+    <div class="text-center max-w-2xl mx-auto space-y-2.5 pt-2">
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        挑對好地方，見面 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-amber-700">一切都好談</span>
+      </h1>
+      <p class="text-slate-500 text-sm sm:text-base leading-relaxed">
+        即時掌握插座、限時與交通停車資訊。一鍵複製約定卡片，3 秒搞定每次會面地點。
+      </p>
+    </div>
+
+    <!-- Filter Control Card -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-card border border-slate-200/70 space-y-5">
+      
+      <!-- Search Box -->
+      <div class="relative">
+        <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          id="search-input" 
+          type="text" 
+          placeholder="搜尋咖啡廳名稱、捷運站、地標或地址..." 
+          class="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200/80 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm placeholder:text-slate-400 bg-slate-50/60 transition shadow-inner"
+        />
+      </div>
+
+      <!-- District Quick Filter -->
+      <div class="space-y-2 pt-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3 h-3 text-brand-600"></i>
+            區域快速切換
+          </span>
+        </div>
+        <div id="district-container" class="flex flex-wrap gap-2 pt-0.5">
+          <button data-district="all" class="district-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-sm transition-all duration-200">
+            全部區域
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature Tags & Reset -->
+      <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100 text-xs">
+        <span class="text-[11px] font-bold text-slate-400 mr-1">設施與需求:</span>
+        
+        <button data-filter="socket" class="filter-btn px-3.5 py-1.5 rounded-xl font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="plug" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span>插座充足</span>
+        </button>
+
+        <button data-filter="unlimited" class="filter-btn px-3.5 py-1.5 rounded-xl font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>平日/全天不限時</span>
+        </button>
+
+        <button data-filter="reservable" class="filter-btn px-3.5 py-1.5 rounded-xl font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="calendar-check" class="w-3.5 h-3.5 text-blue-600"></i>
+          <span>可預約訂位</span>
+        </button>
+
+        <button data-filter="quiet" class="filter-btn px-3.5 py-1.5 rounded-xl font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5 text-purple-600"></i>
+          <span>環境安靜好說話</span>
+        </button>
+
+        <button id="reset-btn" class="ml-auto text-xs text-slate-400 hover:text-slate-700 flex items-center gap-1 py-1.5 transition">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          重設條件
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="py-16 text-center text-slate-400 text-sm flex items-center justify-center gap-2.5">
+      <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-brand-600"></i>
+      <span>正在讀取好談空間資料庫...</span>
+    </div>
+
+    <!-- Results Grid -->
+    <div id="cafe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden py-20 text-center space-y-3">
+      <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400 shadow-inner">
+        <i data-lucide="search-x" class="w-7 h-7"></i>
+      </div>
+      <p class="text-base font-bold text-slate-700">找不到符合條件的咖啡廳</p>
+      <p class="text-xs text-slate-400 max-w-sm mx-auto">請嘗試切換區域、更換關鍵字或取消部分篩選標籤</p>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900/95 backdrop-blur text-white px-4 py-3 rounded-2xl text-xs font-medium shadow-2xl opacity-0 translate-y-4 transition duration-300 pointer-events-none flex items-center gap-2.5 z-50 border border-slate-700/50">
+    <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+      <i data-lucide="check" class="w-3.5 h-3.5"></i>
+    </div>
+    <span id="toast-text">已複製約定地點資訊至剪貼簿！</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-slate-200/80 py-8 text-center text-xs text-slate-400 bg-white">
+    <div class="max-w-6xl mx-auto px-4 space-y-2">
+      <p class="font-bold text-slate-700 text-sm">好談 Cafe</p>
+      <p>挑對好地方，見面 一切都好談 ｜ 專為深度對話與優質會面打造的空間指南</p>
+    </div>
+  </footer>
+
+  <script>
+    // ⚠️ 您的 Google Sheets CSV 網址 ⚠️
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTFSGtdFDLpXvcZ4VeAZ9IpG_KWdhGVUPDfuO1h_WULV9FUaM5Xlo-S1X60jZLnZMxWLs8ZeUY02MXr/pub?output=tsv";
+
+    let cafes = [];
+    let selectedDistrict = "all";
+    const activeFilters = new Set();
+    let searchQuery = "";
+
+    const grid = document.getElementById("cafe-grid");
+    const emptyState = document.getElementById("empty-state");
+    const loadingState = document.getElementById("loading-state");
+    const searchInput = document.getElementById("search-input");
+    const totalCountEl = document.getElementById("total-count");
+    const districtContainer = document.getElementById("district-container");
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const toast = document.getElementById("toast");
+
+    function loadDataFromSheet() {
+      Papa.parse(GOOGLE_SHEET_CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (!results.data || results.data.length === 0) {
+            loadingState.innerHTML = "試算表中無有效資料。";
+            return;
+          }
+
+          cafes = results.data
+            .filter(item => item.name && item.name.trim() !== "" && item.name.toLowerCase() !== "name")
+            .map(item => {
+              const name = (item.name || "").trim();
+              const ratingVal = (item.rating || "").trim();
+
+              return {
+                id: item.id || Math.random().toString(),
+                name: name,
+                mrt: (item.mrt || "").trim(),
+                district: (item.district || "其他").trim(),
+                address: (item.address || "").trim(),
+                minSpend: (item.minSpend || "依店家規定").trim(),
+                timeLimit: (item.timeLimit || "依現場為主").trim(),
+                socket: (item.socket || "未知").trim(),
+                quietLevel: (item.quietLevel || "適中").trim(),
+                rating: ratingVal,
+                reservable: String(item.reservable || "").toUpperCase() === "TRUE",
+                tags: (item.tags || "").split(",").map(t => t.trim().toLowerCase()),
+                googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(name + " " + (item.address || ""))}`
+              };
+            });
+          
+          loadingState.classList.add("hidden");
+          buildDistrictButtons();
+          renderCafes();
+        },
+        error: function(err) {
+          console.error("載入失敗:", err);
+          loadingState.innerHTML = "載入失敗，請確認 Google Sheet 發布設定。";
+        }
+      });
+    }
+
+    function buildDistrictButtons() {
+      const districtCounts = {};
+      cafes.forEach(c => {
+        if (c.district) {
+          districtCounts[c.district] = (districtCounts[c.district] || 0) + 1;
+        }
+      });
+
+      const sortedDistricts = Object.keys(districtCounts).sort((a, b) => districtCounts[b] - districtCounts[a]);
+
+      districtContainer.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.className = "district-btn px-4 py-1.5 rounded-full text-xs font-bold bg-brand-600 text-white shadow-sm transition-all duration-150";
+      allBtn.dataset.district = "all";
+      allBtn.textContent = `全部區域 (${cafes.length})`;
+      allBtn.addEventListener("click", () => selectDistrict("all", allBtn));
+      districtContainer.appendChild(allBtn);
+
+      sortedDistricts.forEach(district => {
+        const btn = document.createElement("button");
+        btn.className = "district-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60 transition-all duration-150";
+        btn.dataset.district = district;
+        btn.textContent = `${district} (${districtCounts[district]})`;
+        btn.addEventListener("click", () => selectDistrict(district, btn));
+        districtContainer.appendChild(btn);
+      });
+    }
+
+    function selectDistrict(district, targetBtn) {
+      selectedDistrict = district;
+      const allBtns = districtContainer.querySelectorAll(".district-btn");
+      allBtns.forEach(b => {
+        b.classList.remove("bg-brand-600", "text-white", "font-bold", "shadow-sm");
+        b.classList.add("bg-slate-100", "text-slate-600", "font-medium", "border-slate-200/60");
+      });
+      targetBtn.classList.remove("bg-slate-100", "text-slate-600", "font-medium", "border-slate-200/60");
+      targetBtn.classList.add("bg-brand-600", "text-white", "font-bold", "shadow-sm");
+
+      renderCafes();
+    }
+
+    function renderCafes() {
+      const filtered = cafes.filter(cafe => {
+        const matchDistrict = selectedDistrict === "all" || cafe.district === selectedDistrict;
+        const matchSearch = 
+          cafe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.mrt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cafe.address.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchFilters = Array.from(activeFilters).every(filter => cafe.tags.includes(filter));
+
+        return matchDistrict && matchSearch && matchFilters;
+      });
+
+      totalCountEl.textContent = filtered.length;
+      grid.innerHTML = "";
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove("hidden");
+        return;
+      } else {
+        emptyState.classList.add("hidden");
+      }
+
+      filtered.forEach(cafe => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-3xl p-5 border border-slate-200/80 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-brand-500/30 transition-all duration-200 flex flex-col justify-between space-y-4 group";
+        
+        const isUnlimited = cafe.tags.includes('unlimited') || cafe.timeLimit.includes('不限時');
+
+        const ratingHtml = cafe.rating ? `
+          <div class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full text-[11px] font-extrabold border border-amber-200/70 shadow-sm">
+            <span class="text-amber-500 text-xs">★</span>
+            <span>${cafe.rating}</span>
+          </div>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="space-y-3.5">
+            <!-- Top Header -->
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/50">
+                    ${cafe.district}
+                  </span>
+                  ${ratingHtml}
+                </div>
+                <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-700 transition leading-snug">
+                  ${cafe.name}
+                </h3>
+              </div>
+              <span class="text-[11px] px-2.5 py-1 rounded-full shrink-0 font-medium ${
+                cafe.reservable 
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
+                  : 'bg-slate-100 text-slate-500 border border-slate-200/50'
+              }">
+                ${cafe.reservable ? '● 可預約訂位' : '現場候位'}
+              </span>
+            </div>
+
+            <!-- Location -->
+            <div class="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-50/80 px-3 py-1.5 rounded-xl border border-slate-100">
+              <i data-lucide="navigation-2" class="w-3.5 h-3.5 text-brand-600 shrink-0"></i>
+              <span class="truncate font-medium">${cafe.mrt}</span>
+            </div>
+
+            <!-- Details Block -->
+            <div class="bg-slate-50/50 rounded-2xl p-3 border border-slate-100 space-y-2 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-normal">低消規定</span>
+                <span class="font-medium text-slate-700">${cafe.minSpend}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-normal">時間限制</span>
+                <span class="font-bold ${isUnlimited ? 'text-emerald-600 bg-emerald-50/80 px-1.5 py-0.5 rounded' : 'text-slate-700'}">${cafe.timeLimit}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-normal">插座狀況</span>
+                <span class="font-medium text-slate-700">${cafe.socket}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-normal">環境氛圍</span>
+                <span class="font-medium text-slate-700">${cafe.quietLevel}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="pt-2 flex items-center gap-2">
+            <button id="btn-copy-${cafe.id}" onclick="copyInviteCard('${cafe.id}')" class="flex-1 py-2.5 px-3 rounded-2xl bg-brand-50 hover:bg-brand-100/80 text-brand-700 hover:text-brand-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-all border border-brand-200/50 active:scale-95 shadow-sm">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span class="btn-text">複製約定卡片</span>
+            </button>
+            <a href="${cafe.googleMapsUrl}" target="_blank" rel="noopener" class="p-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-brand-600 text-xs flex items-center justify-center transition shadow-sm active:scale-95" title="在 Google Maps 開啟">
+              <i data-lucide="map" class="w-4 h-4"></i>
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // 複製卡片文字
+    window.copyInviteCard = function(id) {
+      const cafe = cafes.find(c => String(c.id) === String(id));
+      if (!cafe) return;
+
+      const ratingText = cafe.rating ? ` (Google 評價 ★ ${cafe.rating})` : '';
+      const text = `📍 會面地點建議：\n\n【${cafe.name}】${ratingText}\n・交通：${cafe.mrt}\n・地址：${cafe.address}\n・規範：${cafe.minSpend} / ${cafe.timeLimit}\n・地圖導航：${cafe.googleMapsUrl}\n\n如有任何變動隨時跟我說！`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("已複製約定地點資訊，可直接貼給對方！");
+        
+        const targetBtn = document.getElementById(`btn-copy-${id}`);
+        if (targetBtn) {
+          const btnText = targetBtn.querySelector(".btn-text");
+          if (btnText) {
+            btnText.textContent = "已複製！";
+            setTimeout(() => {
+              btnText.textContent = "複製約定卡片";
+            }, 1800);
+          }
+        }
+      });
+    };
+
+    function showToast(msg) {
+      const toastText = document.getElementById("toast-text");
+      toastText.textContent = msg;
+      toast.classList.remove("opacity-0", "translate-y-4");
+      toast.classList.add("opacity-100", "translate-y-0");
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-4");
+        toast.classList.remove("opacity-100", "translate-y-0");
+      }, 2500);
+    }
+
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim();
+      renderCafes();
+    });
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const filter = btn.dataset.filter;
+        if (activeFilters.has(filter)) {
+          activeFilters.delete(filter);
+          btn.classList.remove("bg-brand-600", "text-white", "border-brand-600");
+          btn.classList.add("bg-white", "text-slate-600", "border-slate-200");
+        } else {
+          activeFilters.add(filter);
+          btn.classList.add("bg-brand-600", "text-white", "border-brand-600");
+          btn.classList.remove("bg-white", "text-slate-600", "border-slate-200");
+        }
+        renderCafes();
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      activeFilters.clear();
+      selectedDistrict = "all";
+      searchQuery = "";
+      searchInput.value = "";
+
+      const allBtns = districtContainer.querySelectorAll(".district-btn");
+      allBtns.forEach(b => {
+        if (b.dataset.district === "all") {
+          b.classList.add("bg-brand-600", "text-white", "font-bold", "shadow-sm");
+          b.classList.remove("bg-slate-100", "text-slate-600", "font-medium", "border-slate-200/60");
+        } else {
+          b.classList.remove("bg-brand-600", "text-white", "font-bold", "shadow-sm");
+          b.classList.add("bg-slate-100", "text-slate-600", "font-medium", "border-slate-200/60");
+        }
+      });
+
+      filterBtns.forEach(btn => {
+        btn.classList.remove("bg-brand-600", "text-white", "border-brand-600");
+        btn.classList.add("bg-white", "text-slate-600", "border-slate-200");
+      });
+
+      renderCafes();
+    });
+
+    loadDataFromSheet();
+  </script>
+</body>
+</html>        }
       }
     }
   </script>
