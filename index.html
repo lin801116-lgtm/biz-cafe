@@ -43,8 +43,53 @@
 <body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+ <!-- Header 頂部區塊 -->
+<header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    
+    <!-- Brand Logo + Tagline -->
+    <div class="flex items-center space-x-3">
+      <!-- 拿鐵對話杯 Logo -->
+      <div class="w-10 h-10 rounded-2xl bg-[#fdfbf7] border border-amber-200/70 p-1 flex items-center justify-center shrink-0 shadow-sm">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+          <!-- 碟子 -->
+          <ellipse cx="50" cy="84" rx="34" ry="7" fill="#f5ede0" stroke="#331c12" stroke-width="4.5"/>
+          <!-- 杯把 -->
+          <path d="M70 48C83 48 88 57 84 68C80 77 71 75 65 73" stroke="#331c12" stroke-width="5" stroke-linecap="round"/>
+          <!-- 杯身 -->
+          <path d="M22 42C22 42 24 76 50 76C76 76 78 42 78 42H22Z" fill="#ffffff" stroke="#331c12" stroke-width="5" stroke-linejoin="round"/>
+          <!-- 咖啡表面與拉花 -->
+          <ellipse cx="50" cy="43" rx="27" ry="8" fill="#783e18" stroke="#331c12" stroke-width="4"/>
+          <ellipse cx="50" cy="43" rx="17" ry="4.5" fill="#b06935"/>
+          <ellipse cx="50" cy="43" rx="9" ry="2.5" fill="#fef5e7"/>
+          <circle cx="50" cy="42" r="1.5" fill="#b06935"/>
+          <!-- 杯身橘紅定位點 -->
+          <path d="M50 54C44.5 54 40 58.5 40 64C40 71 50 77 50 77C50 77 60 71 60 64C60 58.5 55.5 54 50 54Z" fill="#e75b28"/>
+          <circle cx="50" cy="63" r="3" fill="#ffffff"/>
+          <!-- 對話氣泡 -->
+          <path d="M50 8C33 8 25 19 25 29C25 36 29 42 35 45L33 53L43 48C45.2 48.7 47.6 49 50 49C67 49 75 38 75 29C75 19 67 8 50 8Z" fill="#fef5e7" stroke="#331c12" stroke-width="4.5" stroke-linejoin="round"/>
+          <!-- 對話框三個點 -->
+          <circle cx="39" cy="28" r="3" fill="#331c12"/>
+          <circle cx="50" cy="28" r="3" fill="#331c12"/>
+          <circle cx="61" cy="28" r="3" fill="#331c12"/>
+        </svg>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl font-black tracking-tight text-slate-900">好談 Cafe</span>
+        <span class="hidden sm:inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 border border-brand-200/80">
+          業務見客 ✕ 團隊輔導 ✕ 朋友聊心
+        </span>
+      </div>
+    </div>
+
+    <!-- Shop Count Badge -->
+    <div class="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/60">
+      <i data-lucide="store" class="w-3.5 h-3.5 text-slate-400"></i>
+      <span>已精選 <strong id="total-count" class="font-bold text-slate-900">0</strong> 間好談店點</span>
+    </div>
+  </div>
+</header>
       
       <!-- Brand Logo + Tagline -->
       <div class="flex items-center space-x-3">
